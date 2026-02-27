@@ -87,5 +87,25 @@ describe("stories tools", () => {
       expect(parsed.error).toBe("NETWORK_ERROR");
       expect(parsed.retryable).toBe(true);
     });
+
+    it("handles non-Error thrown values in hn_get_stories", async () => {
+      const mockReadClient = {
+        getStories: vi.fn().mockRejectedValue("string-fail"),
+      } as unknown as HNReadClient;
+      const failServer = createMockServer();
+      registerStoriesTools(
+        failServer as unknown as Parameters<typeof registerStoriesTools>[0],
+        mockReadClient,
+      );
+
+      const result = await failServer.call("hn_get_stories", {
+        category: "top",
+        limit: 10,
+      });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(parsed.message).toBe("string-fail");
+    });
   });
 });

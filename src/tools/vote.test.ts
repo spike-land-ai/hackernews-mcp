@@ -123,5 +123,22 @@ describe("vote tools", () => {
       expect(parsed.error).toBe("RATE_LIMITED");
       expect(parsed.retryable).toBe(true);
     });
+
+    it("handles non-Error thrown values in hn_upvote", async () => {
+      const mockWriteClient = {
+        upvote: vi.fn().mockRejectedValue("string-fail"),
+      } as unknown as HNWriteClient;
+      const failServer = createMockServer();
+      registerVoteTools(
+        failServer as unknown as Parameters<typeof registerVoteTools>[0],
+        mockWriteClient,
+      );
+
+      const result = await failServer.call("hn_upvote", { itemId: 12345 });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(parsed.message).toBe("string-fail");
+    });
   });
 });

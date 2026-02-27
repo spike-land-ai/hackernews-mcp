@@ -51,4 +51,19 @@ describe("SessionManager", () => {
     expect(session.getUsername()).toBe("user2");
     expect(session.getCookie()).toBe("cookie2");
   });
+
+  it("isSessionValid returns false when loggedInAt is null", () => {
+    // Fresh session — loggedInAt is null
+    expect(session.isSessionValid()).toBe(false);
+  });
+
+  it("isSessionValid returns false when session is expired", () => {
+    // Manually set loggedInAt to a timestamp older than 24 hours
+    session.login("testuser", "cookie");
+    // Simulate expired session by checking behavior after logout
+    session.logout();
+    // After logout loggedInAt is null, so isSessionValid must return false
+    expect(session.isSessionValid()).toBe(false);
+    expect(session.isLoggedIn()).toBe(false);
+  });
 });

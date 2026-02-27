@@ -21,7 +21,7 @@ import {
 } from "../types.js";
 
 export class HNReadClient {
-  private fetchFn: FetchFn;
+  private readonly fetchFn: FetchFn;
   private readonly MAX_COMMENTS_PER_LEVEL = 200;
 
   constructor(fetchFn: FetchFn = globalThis.fetch) {

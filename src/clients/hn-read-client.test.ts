@@ -3,8 +3,6 @@ import { HNReadClient } from "./hn-read-client.js";
 import {
   createFailingFetch,
   createMockFetch,
-} from "../__test-utils__/index.js";
-import {
   SAMPLE_ALGOLIA_RESULT,
   SAMPLE_COMMENT,
   SAMPLE_NESTED_COMMENT,
@@ -321,6 +319,130 @@ describe("HNReadClient", () => {
       await expect(client.search({ query: "test" })).rejects.toThrow(
         "Network error",
       );
+    });
+  });
+
+  describe("JSON parse error branches", () => {
+    it("getItem returns null when response body is not valid JSON", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/item/12345.json`,
+          response: { body: "not-json{{" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const item = await client.getItem(12345);
+      expect(item).toBeNull();
+    });
+
+    it("getUser returns null when response body is not valid JSON", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/user/pg.json`,
+          response: { body: "not-json{{" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const user = await client.getUser("pg");
+      expect(user).toBeNull();
+    });
+
+    it("getStoryIds returns empty array when response body is not valid JSON", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/topstories.json`,
+          response: { body: "not-json{{" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const ids = await client.getStoryIds("top");
+      expect(ids).toEqual([]);
+    });
+
+    it("getUpdates returns empty on JSON parse error", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/updates.json`,
+          response: { body: "not-json{{" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const updates = await client.getUpdates();
+      expect(updates).toEqual({ items: [], profiles: [] });
+    });
+
+    it("search returns empty on 404", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${ALGOLIA_BASE}/search`,
+          response: { status: 404, body: "not found" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const result = await client.search({ query: "test" });
+      expect(result.hits).toHaveLength(0);
+      expect(result.nbHits).toBe(0);
+    });
+
+    it("search returns empty on JSON parse error", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${ALGOLIA_BASE}/search`,
+          response: { body: "not-json{{" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const result = await client.search({ query: "test" });
+      expect(result.hits).toHaveLength(0);
+      expect(result.nbHits).toBe(0);
+    });
+
+    it("getItem returns null on 404", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/item/12345.json`,
+          response: { status: 404, body: "not found" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const item = await client.getItem(12345);
+      expect(item).toBeNull();
+    });
+
+    it("getUser returns null on 404", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/user/pg.json`,
+          response: { status: 404, body: "not found" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const user = await client.getUser("pg");
+      expect(user).toBeNull();
+    });
+
+    it("getStoryIds returns empty array on 404", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/topstories.json`,
+          response: { status: 404, body: "not found" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const ids = await client.getStoryIds("top");
+      expect(ids).toEqual([]);
+    });
+
+    it("getUpdates returns empty on 404", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/updates.json`,
+          response: { status: 404, body: "not found" },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const updates = await client.getUpdates();
+      expect(updates).toEqual({ items: [], profiles: [] });
     });
   });
 });

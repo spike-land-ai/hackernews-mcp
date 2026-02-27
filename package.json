@@ -1,6 +1,6 @@
 {
   "name": "@spike-land-ai/hackernews-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for HackerNews with full read + write support",
   "type": "module",
   "bin": "dist/index.js",

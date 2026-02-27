@@ -175,7 +175,7 @@ export class HNWriteClient {
     }
 
     // Step 2: GET the vote URL
-    const voteUrl = voteMatch[1].replace(/&amp;/g, "&");
+    const voteUrl = (voteMatch[1] as string).replace(/&amp;/g, "&");
     const voteResp = await this.fetchFn(`${HN_WEB_BASE}/${voteUrl}`, {
       headers: { Cookie: this.session.getCookie()! },
       redirect: "manual",
@@ -230,7 +230,7 @@ export class HNWriteClient {
     const body = new URLSearchParams({
       parent: String(parentId),
       text,
-      hmac: hmacMatch[1],
+      hmac: hmacMatch[1] as string,
       goto: `item?id=${parentId}`,
     });
 
@@ -282,7 +282,7 @@ export class HNWriteClient {
       const retryBody = new URLSearchParams({
         parent: String(parentId),
         text,
-        hmac: retryHmac[1],
+        hmac: retryHmac[1] as string,
         goto: `item?id=${parentId}`,
       });
 
@@ -348,7 +348,7 @@ export class HNWriteClient {
       };
     }
 
-    return { success: true, token: fnidMatch[1] };
+    return { success: true, token: fnidMatch[1] as string };
   }
 
   private isRateLimited(html: string): boolean {

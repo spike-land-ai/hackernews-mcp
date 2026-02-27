@@ -22,32 +22,64 @@ import {
 
 export class HNReadClient {
   private fetchFn: FetchFn;
+  private readonly MAX_COMMENTS_PER_LEVEL = 200;
 
   constructor(fetchFn: FetchFn = globalThis.fetch) {
     this.fetchFn = fetchFn;
   }
 
   async getItem(id: number): Promise<HNItem | null> {
-    const resp = await this.fetchFn(`${HN_FIREBASE_BASE}/item/${id}.json`);
-    if (!resp.ok) return null;
-    const data = await resp.json();
+    const url = `${HN_FIREBASE_BASE}/item/${id}.json`;
+    const resp = await this.fetchFn(url);
+    if (resp.status === 404) return null;
+    if (!resp.ok) {
+      console.error(`HN API error ${resp.status} for ${url}`);
+      return null;
+    }
+    let data: unknown;
+    try {
+      data = await resp.json();
+    } catch {
+      // API returned non-JSON response
+      return null;
+    }
     return data as HNItem | null;
   }
 
   async getUser(username: string): Promise<HNUser | null> {
-    const resp = await this.fetchFn(
-      `${HN_FIREBASE_BASE}/user/${username}.json`,
-    );
-    if (!resp.ok) return null;
-    const data = await resp.json();
+    const url = `${HN_FIREBASE_BASE}/user/${username}.json`;
+    const resp = await this.fetchFn(url);
+    if (resp.status === 404) return null;
+    if (!resp.ok) {
+      console.error(`HN API error ${resp.status} for ${url}`);
+      return null;
+    }
+    let data: unknown;
+    try {
+      data = await resp.json();
+    } catch {
+      // API returned non-JSON response
+      return null;
+    }
     return data as HNUser | null;
   }
 
   async getStoryIds(category: StoryCategory): Promise<number[]> {
     const endpoint = STORY_CATEGORY_ENDPOINTS[category];
-    const resp = await this.fetchFn(`${HN_FIREBASE_BASE}/${endpoint}.json`);
-    if (!resp.ok) return [];
-    const data = await resp.json();
+    const url = `${HN_FIREBASE_BASE}/${endpoint}.json`;
+    const resp = await this.fetchFn(url);
+    if (resp.status === 404) return [];
+    if (!resp.ok) {
+      console.error(`HN API error ${resp.status} for ${url}`);
+      return [];
+    }
+    let data: unknown;
+    try {
+      data = await resp.json();
+    } catch {
+      // API returned non-JSON response
+      return [];
+    }
     return (data as number[]) ?? [];
   }
 
@@ -76,7 +108,8 @@ export class HNReadClient {
   ): Promise<HNCommentNode[]> {
     if (currentDepth > maxDepth || kidIds.length === 0) return [];
 
-    const items = await Promise.all(kidIds.map(id => this.getItem(id)));
+    const limitedKidIds = kidIds.slice(0, this.MAX_COMMENTS_PER_LEVEL);
+    const items = await Promise.all(limitedKidIds.map(id => this.getItem(id)));
     const nodes: HNCommentNode[] = [];
 
     for (const item of items) {
@@ -103,9 +136,20 @@ export class HNReadClient {
   }
 
   async getUpdates(): Promise<HNUpdates> {
-    const resp = await this.fetchFn(`${HN_FIREBASE_BASE}/updates.json`);
-    if (!resp.ok) return { items: [], profiles: [] };
-    const data = await resp.json();
+    const url = `${HN_FIREBASE_BASE}/updates.json`;
+    const resp = await this.fetchFn(url);
+    if (resp.status === 404) return { items: [], profiles: [] };
+    if (!resp.ok) {
+      console.error(`HN API error ${resp.status} for ${url}`);
+      return { items: [], profiles: [] };
+    }
+    let data: unknown;
+    try {
+      data = await resp.json();
+    } catch {
+      // API returned non-JSON response
+      return { items: [], profiles: [] };
+    }
     return data as HNUpdates;
   }
 
@@ -127,13 +171,22 @@ export class HNReadClient {
     if (tags) urlParams.set("tags", tags);
     if (numericFilters) urlParams.set("numericFilters", numericFilters);
 
-    const resp = await this.fetchFn(
-      `${ALGOLIA_BASE}/${endpoint}?${urlParams.toString()}`,
-    );
-    if (!resp.ok) {
+    const url = `${ALGOLIA_BASE}/${endpoint}?${urlParams.toString()}`;
+    const resp = await this.fetchFn(url);
+    if (resp.status === 404) {
       return { hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage };
     }
-    const data = await resp.json();
+    if (!resp.ok) {
+      console.error(`HN API error ${resp.status} for ${url}`);
+      return { hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage };
+    }
+    let data: unknown;
+    try {
+      data = await resp.json();
+    } catch {
+      // API returned non-JSON response
+      return { hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage };
+    }
     return data as AlgoliaSearchResult;
   }
 }

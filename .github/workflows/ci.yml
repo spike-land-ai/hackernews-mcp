@@ -1,3 +1,4 @@
+# CI pipeline: build, test, and publish via changesets
 name: CI & Publish
 on:
   push:

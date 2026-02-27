@@ -37,22 +37,6 @@ export const SAMPLE_NESTED_COMMENT: HNItem = {
   parent: 12346,
 };
 
-export const SAMPLE_JOB: HNItem = {
-  id: 12349,
-  type: "job",
-  by: "whoishiring",
-  time: 1704067200,
-  title: "YC Startup (YC S24) is hiring engineers",
-  url: "https://example.com/jobs",
-  score: 1,
-};
-
-export const SAMPLE_DELETED_ITEM: HNItem = {
-  id: 99999,
-  type: "comment",
-  deleted: true,
-};
-
 // ─── HN Users ───
 
 export const SAMPLE_USER: HNUser = {

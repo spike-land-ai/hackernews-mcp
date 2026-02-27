@@ -1,0 +1,36 @@
+{
+  "name": "@spike-land-ai/hackernews-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for HackerNews with full read + write support",
+  "type": "module",
+  "bin": "dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.2",
+    "@vitest/coverage-v8": "^4.0.18",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "keywords": [
+    "mcp",
+    "hackernews",
+    "hn",
+    "hacker-news"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,7 @@
+.changeset/
+.github/
+.nvmrc
+coverage/
+src/**/*.test.ts
+src/**/*.spec.ts
+vitest.config.ts

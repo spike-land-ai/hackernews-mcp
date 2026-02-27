@@ -72,5 +72,22 @@ describe("user tools", () => {
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.error).toBe("NETWORK_ERROR");
     });
+
+    it("handles non-Error thrown values in hn_get_user", async () => {
+      const mockReadClient = {
+        getUser: vi.fn().mockRejectedValue("string-fail"),
+      } as unknown as HNReadClient;
+      const failServer = createMockServer();
+      registerUserTools(
+        failServer as unknown as Parameters<typeof registerUserTools>[0],
+        mockReadClient,
+      );
+
+      const result = await failServer.call("hn_get_user", { username: "pg" });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(parsed.message).toBe("string-fail");
+    });
   });
 });

@@ -95,6 +95,28 @@ describe("search tools", () => {
       });
       expect(result.isError).toBe(true);
     });
+
+    it("handles non-Error thrown values in hn_search", async () => {
+      const mockReadClient = {
+        search: vi.fn().mockRejectedValue("string-fail"),
+      } as unknown as HNReadClient;
+      const failServer = createMockServer();
+      registerSearchTools(
+        failServer as unknown as Parameters<typeof registerSearchTools>[0],
+        mockReadClient,
+      );
+
+      const result = await failServer.call("hn_search", {
+        query: "test",
+        sortBy: "relevance",
+        page: 0,
+        hitsPerPage: 20,
+      });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(parsed.message).toBe("string-fail");
+    });
   });
 
   describe("hn_get_updates", () => {
@@ -120,7 +142,7 @@ describe("search tools", () => {
     it("handles non-Error thrown values in get_updates", async () => {
       const mockReadClient = {
         getUpdates: vi.fn().mockRejectedValue("string-fail"),
-      } as any;
+      } as unknown as HNReadClient;
       const failServer = createMockServer();
       registerSearchTools(
         failServer as unknown as Parameters<typeof registerSearchTools>[0],

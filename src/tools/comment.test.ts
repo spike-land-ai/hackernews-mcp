@@ -140,5 +140,50 @@ describe("comment tools", () => {
       expect(parsed.error).toBe("RATE_LIMITED");
       expect(parsed.retryable).toBe(true);
     });
+
+    it("returns CSRF_EXPIRED retryable true", async () => {
+      session.login("testuser", "user=testuser");
+      const mockWriteClient = {
+        postComment: vi.fn().mockResolvedValue({
+          success: false,
+          error: "CSRF_EXPIRED",
+          message: "CSRF token expired and retry failed",
+        }),
+      } as unknown as HNWriteClient;
+      const failServer = createMockServer();
+      registerCommentTools(
+        failServer as unknown as Parameters<typeof registerCommentTools>[0],
+        mockWriteClient,
+      );
+
+      const result = await failServer.call("hn_post_comment", {
+        parentId: 12345,
+        text: "Comment",
+      });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("CSRF_EXPIRED");
+      expect(parsed.retryable).toBe(true);
+    });
+
+    it("handles non-Error thrown values in hn_post_comment", async () => {
+      const mockWriteClient = {
+        postComment: vi.fn().mockRejectedValue("string-fail"),
+      } as unknown as HNWriteClient;
+      const failServer = createMockServer();
+      registerCommentTools(
+        failServer as unknown as Parameters<typeof registerCommentTools>[0],
+        mockWriteClient,
+      );
+
+      const result = await failServer.call("hn_post_comment", {
+        parentId: 12345,
+        text: "Comment",
+      });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(parsed.message).toBe("string-fail");
+    });
   });
 });

@@ -120,5 +120,44 @@ describe("item tools", () => {
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.error).toBe("NETWORK_ERROR");
     });
+
+    it("handles non-Error thrown values in get_item_with_comments", async () => {
+      const mockReadClient = {
+        getItemWithComments: vi.fn().mockRejectedValue("string-error"),
+      } as unknown as HNReadClient;
+      const failServer = createMockServer();
+      registerItemTools(
+        failServer as unknown as Parameters<typeof registerItemTools>[0],
+        mockReadClient,
+      );
+
+      const result = await failServer.call("hn_get_item_with_comments", {
+        id: 12345,
+        depth: 2,
+      });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(parsed.message).toBe("string-error");
+    });
+  });
+
+  describe("non-Error thrown values", () => {
+    it("handles non-Error thrown values in hn_get_item", async () => {
+      const mockReadClient = {
+        getItem: vi.fn().mockRejectedValue("string-fail"),
+      } as unknown as HNReadClient;
+      const failServer = createMockServer();
+      registerItemTools(
+        failServer as unknown as Parameters<typeof registerItemTools>[0],
+        mockReadClient,
+      );
+
+      const result = await failServer.call("hn_get_item", { id: 12345 });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(parsed.message).toBe("string-fail");
+    });
   });
 });

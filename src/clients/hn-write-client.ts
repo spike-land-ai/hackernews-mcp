@@ -12,8 +12,8 @@ export type WriteResult =
   | { success: false; error: HNErrorCode; message: string; };
 
 export class HNWriteClient {
-  private fetchFn: FetchFn;
-  private session: SessionManager;
+  private readonly fetchFn: FetchFn;
+  private readonly session: SessionManager;
 
   constructor(session: SessionManager, fetchFn: FetchFn = globalThis.fetch) {
     this.fetchFn = fetchFn;

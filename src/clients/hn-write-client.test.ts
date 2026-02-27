@@ -420,4 +420,171 @@ describe("HNWriteClient", () => {
         .toThrow("Connection refused");
     });
   });
+
+  describe("submitStory additional branches", () => {
+    it("succeeds when response is 302 status", async () => {
+      session.login("testuser", "user=testuser");
+      const fetch = createMockFetch([
+        { url: `${HN_WEB_BASE}/submit`, response: { body: SUBMIT_PAGE_HTML } },
+        {
+          url: `${HN_WEB_BASE}/r`,
+          method: "POST",
+          response: { status: 302, body: "<html>redirecting</html>" },
+        },
+      ]);
+      const client = new HNWriteClient(session, fetch);
+      const result = await client.submitStory("Title", "https://example.com");
+      expect(result.success).toBe(true);
+    });
+
+    it("fails when CSRF retry also fails to extract fnid", async () => {
+      session.login("testuser", "user=testuser");
+      let submitCallCount = 0;
+      const fetch = vi.fn(
+        async (input: string | URL | Request, init?: RequestInit) => {
+          const url = typeof input === "string"
+            ? input
+            : input instanceof URL
+            ? input.toString()
+            : input.url;
+          const method = init?.method ?? "GET";
+
+          if (url.includes("/submit")) {
+            // First call returns valid fnid; second call (retry) returns no fnid
+            if (submitCallCount === 0) {
+              return new Response(SUBMIT_PAGE_HTML, { status: 200 });
+            }
+            return new Response("<html>No form here</html>", { status: 200 });
+          }
+          if (url.includes("/r") && method === "POST") {
+            submitCallCount++;
+            return new Response("<html>Unknown or expired link.</html>", {
+              status: 200,
+            });
+          }
+          return new Response("Not found", { status: 404 });
+        },
+      ) as unknown as typeof globalThis.fetch;
+
+      const client = new HNWriteClient(session, fetch);
+      const result = await client.submitStory("Title", "https://example.com");
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("CSRF_EXPIRED");
+    });
+
+    it("fails with SUBMIT_FAILED on generic failure after CSRF retry", async () => {
+      session.login("testuser", "user=testuser");
+      let submitCallCount = 0;
+      const fetch = vi.fn(
+        async (input: string | URL | Request, init?: RequestInit) => {
+          const url = typeof input === "string"
+            ? input
+            : input instanceof URL
+            ? input.toString()
+            : input.url;
+          const method = init?.method ?? "GET";
+
+          if (url.includes("/submit")) {
+            return new Response(SUBMIT_PAGE_HTML, { status: 200 });
+          }
+          if (url.includes("/r") && method === "POST") {
+            submitCallCount++;
+            if (submitCallCount === 1) {
+              return new Response("<html>Unknown or expired link.</html>", {
+                status: 200,
+              });
+            }
+            // Second attempt also fails, no success indicators
+            return new Response("<html>Some other error</html>", {
+              status: 200,
+            });
+          }
+          return new Response("Not found", { status: 404 });
+        },
+      ) as unknown as typeof globalThis.fetch;
+
+      const client = new HNWriteClient(session, fetch);
+      const result = await client.submitStory("Title", "https://example.com");
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("SUBMIT_FAILED");
+    });
+  });
+
+  describe("postComment additional branches", () => {
+    it("fails when retry hmac extraction fails", async () => {
+      session.login("testuser", "user=testuser");
+      let commentCallCount = 0;
+      const fetch = vi.fn(
+        async (input: string | URL | Request, init?: RequestInit) => {
+          const url = typeof input === "string"
+            ? input
+            : input instanceof URL
+            ? input.toString()
+            : input.url;
+          const method = init?.method ?? "GET";
+
+          if (url.includes("/item?id=12345") && method === "GET") {
+            // First GET returns valid form; second GET (retry fetch) returns no hmac
+            if (commentCallCount === 0) {
+              return new Response(ITEM_PAGE_WITH_COMMENT_FORM_HTML, {
+                status: 200,
+              });
+            }
+            return new Response("<html>No form here</html>", { status: 200 });
+          }
+          if (url.includes("/comment") && method === "POST") {
+            commentCallCount++;
+            return new Response("<html>Unknown or expired link.</html>", {
+              status: 200,
+            });
+          }
+          return new Response("Not found", { status: 404 });
+        },
+      ) as unknown as typeof globalThis.fetch;
+
+      const client = new HNWriteClient(session, fetch);
+      const result = await client.postComment(12345, "My comment");
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("CSRF_EXPIRED");
+    });
+
+    it("fails with COMMENT_FAILED when retry post also fails", async () => {
+      session.login("testuser", "user=testuser");
+      let commentCallCount = 0;
+      const fetch = vi.fn(
+        async (input: string | URL | Request, init?: RequestInit) => {
+          const url = typeof input === "string"
+            ? input
+            : input instanceof URL
+            ? input.toString()
+            : input.url;
+          const method = init?.method ?? "GET";
+
+          if (url.includes("/item?id=12345") && method === "GET") {
+            return new Response(ITEM_PAGE_WITH_COMMENT_FORM_HTML, {
+              status: 200,
+            });
+          }
+          if (url.includes("/comment") && method === "POST") {
+            commentCallCount++;
+            if (commentCallCount === 1) {
+              return new Response("<html>Unknown or expired link.</html>", {
+                status: 200,
+              });
+            }
+            // Second POST fails with no success indicators
+            return new Response("<html>Comment failed for another reason</html>", {
+              status: 200,
+            });
+          }
+          return new Response("Not found", { status: 404 });
+        },
+      ) as unknown as typeof globalThis.fetch;
+
+      const client = new HNWriteClient(session, fetch);
+      const result = await client.postComment(12345, "My comment");
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("COMMENT_FAILED");
+    });
+  });
 });

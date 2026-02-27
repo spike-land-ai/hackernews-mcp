@@ -122,4 +122,27 @@ describe("auth tools", () => {
       expect(parsed.loggedInAt).toBeTruthy();
     });
   });
+
+  describe("non-Error thrown values", () => {
+    it("handles non-Error thrown values in hn_login", async () => {
+      const mockWriteClient = {
+        login: vi.fn().mockRejectedValue("string-fail"),
+      } as unknown as HNWriteClient;
+      const failServer = createMockServer();
+      registerAuthTools(
+        failServer as unknown as Parameters<typeof registerAuthTools>[0],
+        mockWriteClient,
+        session,
+      );
+
+      const result = await failServer.call("hn_login", {
+        username: "test",
+        password: "test",
+      });
+      expect(result.isError).toBe(true);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(parsed.message).toBe("string-fail");
+    });
+  });
 });

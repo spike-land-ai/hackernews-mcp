@@ -28,10 +28,7 @@ describe("user tools", () => {
       },
     ]);
     readClient = new HNReadClient(fetch);
-    registerUserTools(
-      server as unknown as Parameters<typeof registerUserTools>[0],
-      readClient,
-    );
+    registerUserTools(server as unknown as Parameters<typeof registerUserTools>[0], readClient);
   });
 
   it("registers 1 tool", () => {

@@ -7,10 +7,7 @@ import { z } from "zod";
 import type { HNWriteClient } from "../clients/hn-write-client.js";
 import { errorResult, jsonResult } from "../types.js";
 
-export function registerVoteTools(
-  server: McpServer,
-  writeClient: HNWriteClient,
-): void {
+export function registerVoteTools(server: McpServer, writeClient: HNWriteClient): void {
   server.tool(
     "hn_upvote",
     "Upvote a HackerNews story or comment (requires login)",
@@ -23,11 +20,7 @@ export function registerVoteTools(
         if (result.success) {
           return jsonResult({ status: "upvoted", itemId });
         }
-        return errorResult(
-          result.error,
-          result.message,
-          result.error === "RATE_LIMITED",
-        );
+        return errorResult(result.error, result.message, result.error === "RATE_LIMITED");
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         return errorResult("NETWORK_ERROR", message, true);

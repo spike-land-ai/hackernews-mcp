@@ -14,11 +14,7 @@ import type {
   HNUser,
   StoryCategory,
 } from "../types.js";
-import {
-  ALGOLIA_BASE,
-  HN_FIREBASE_BASE,
-  STORY_CATEGORY_ENDPOINTS,
-} from "../types.js";
+import { ALGOLIA_BASE, HN_FIREBASE_BASE, STORY_CATEGORY_ENDPOINTS } from "../types.js";
 
 export class HNReadClient {
   private readonly fetchFn: FetchFn;
@@ -86,14 +82,11 @@ export class HNReadClient {
   async getStories(category: StoryCategory, limit: number): Promise<HNItem[]> {
     const ids = await this.getStoryIds(category);
     const sliced = ids.slice(0, limit);
-    const items = await Promise.all(sliced.map(id => this.getItem(id)));
+    const items = await Promise.all(sliced.map((id) => this.getItem(id)));
     return items.filter((item): item is HNItem => item !== null);
   }
 
-  async getItemWithComments(
-    id: number,
-    depth: number,
-  ): Promise<HNItemWithComments | null> {
+  async getItemWithComments(id: number, depth: number): Promise<HNItemWithComments | null> {
     const item = await this.getItem(id);
     if (!item) return null;
 
@@ -109,18 +102,15 @@ export class HNReadClient {
     if (currentDepth > maxDepth || kidIds.length === 0) return [];
 
     const limitedKidIds = kidIds.slice(0, this.MAX_COMMENTS_PER_LEVEL);
-    const items = await Promise.all(limitedKidIds.map(id => this.getItem(id)));
+    const items = await Promise.all(limitedKidIds.map((id) => this.getItem(id)));
     const nodes: HNCommentNode[] = [];
 
     for (const item of items) {
       if (!item) continue;
-      const children = currentDepth < maxDepth
-        ? await this.buildCommentTree(
-          item.kids ?? [],
-          maxDepth,
-          currentDepth + 1,
-        )
-        : [];
+      const children =
+        currentDepth < maxDepth
+          ? await this.buildCommentTree(item.kids ?? [], maxDepth, currentDepth + 1)
+          : [];
       nodes.push({
         id: item.id,
         by: item.by,

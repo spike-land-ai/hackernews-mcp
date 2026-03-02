@@ -33,10 +33,7 @@ describe("search tools", () => {
       },
     ]);
     readClient = new HNReadClient(fetch);
-    registerSearchTools(
-      server as unknown as Parameters<typeof registerSearchTools>[0],
-      readClient,
-    );
+    registerSearchTools(server as unknown as Parameters<typeof registerSearchTools>[0], readClient);
   });
 
   it("registers 2 tools", () => {

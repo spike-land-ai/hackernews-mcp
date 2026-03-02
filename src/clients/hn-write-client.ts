@@ -8,8 +8,8 @@ import { HN_WEB_BASE } from "../types.js";
 import type { SessionManager } from "../session/session-manager.js";
 
 export type WriteResult =
-  | { success: true; }
-  | { success: false; error: HNErrorCode; message: string; };
+  | { success: true }
+  | { success: false; error: HNErrorCode; message: string };
 
 export class HNWriteClient {
   private readonly fetchFn: FetchFn;
@@ -61,11 +61,7 @@ export class HNWriteClient {
     return { success: false, error: "AUTH_FAILED", message: "Login failed" };
   }
 
-  async submitStory(
-    title: string,
-    url?: string,
-    text?: string,
-  ): Promise<WriteResult> {
+  async submitStory(title: string, url?: string, text?: string): Promise<WriteResult> {
     const authCheck = this.requireAuth();
     if (authCheck) return authCheck;
 
@@ -98,10 +94,7 @@ export class HNWriteClient {
       };
     }
 
-    if (
-      html.includes("URL=newest") || html.includes("URL=new")
-      || resp.status === 302
-    ) {
+    if (html.includes("URL=newest") || html.includes("URL=new") || resp.status === 302) {
       return { success: true };
     }
 
@@ -132,8 +125,9 @@ export class HNWriteClient {
 
       const retryHtml = await retryResp.text();
       if (
-        retryHtml.includes("URL=newest") || retryHtml.includes("URL=new")
-        || retryResp.status === 302
+        retryHtml.includes("URL=newest") ||
+        retryHtml.includes("URL=new") ||
+        retryResp.status === 302
       ) {
         return { success: true };
       }
@@ -255,20 +249,18 @@ export class HNWriteClient {
     }
 
     if (
-      commentResp.status === 302 || commentHtml.includes("URL=")
-      || commentHtml.includes(`item?id=${parentId}`)
+      commentResp.status === 302 ||
+      commentHtml.includes("URL=") ||
+      commentHtml.includes(`item?id=${parentId}`)
     ) {
       return { success: true };
     }
 
     // CSRF expired — retry once
     if (commentHtml.includes("Unknown") || commentHtml.includes("expired")) {
-      const retryResp = await this.fetchFn(
-        `${HN_WEB_BASE}/item?id=${parentId}`,
-        {
-          headers: { Cookie: this.session.getCookie()! },
-        },
-      );
+      const retryResp = await this.fetchFn(`${HN_WEB_BASE}/item?id=${parentId}`, {
+        headers: { Cookie: this.session.getCookie()! },
+      });
       const retryPageHtml = await retryResp.text();
       const retryHmac = retryPageHtml.match(/name="hmac"\s+value="([^"]+)"/);
       if (!retryHmac) {
@@ -297,9 +289,7 @@ export class HNWriteClient {
       });
 
       const retryCommentHtml = await retryCommentResp.text();
-      if (
-        retryCommentResp.status === 302 || retryCommentHtml.includes("URL=")
-      ) {
+      if (retryCommentResp.status === 302 || retryCommentHtml.includes("URL=")) {
         return { success: true };
       }
       return {
@@ -328,11 +318,12 @@ export class HNWriteClient {
   }
 
   private async extractFnid(): Promise<
-    { success: true; token: string; } | {
-      success: false;
-      error: HNErrorCode;
-      message: string;
-    }
+    | { success: true; token: string }
+    | {
+        success: false;
+        error: HNErrorCode;
+        message: string;
+      }
   > {
     const resp = await this.fetchFn(`${HN_WEB_BASE}/submit`, {
       headers: { Cookie: this.session.getCookie()! },
@@ -352,7 +343,8 @@ export class HNWriteClient {
   }
 
   private isRateLimited(html: string): boolean {
-    return html.includes("too fast") || html.includes("slow down")
-      || html.includes("limit submissions");
+    return (
+      html.includes("too fast") || html.includes("slow down") || html.includes("limit submissions")
+    );
   }
 }

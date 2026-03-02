@@ -19,11 +19,7 @@ export class SessionManager {
   }
 
   isLoggedIn(): boolean {
-    return (
-      this.state.cookie !== null &&
-      this.state.username !== null &&
-      this.isSessionValid()
-    );
+    return this.state.cookie !== null && this.state.username !== null && this.isSessionValid();
   }
 
   getUsername(): string | null {

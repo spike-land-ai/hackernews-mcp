@@ -126,7 +126,7 @@ export type HNErrorCode =
 
 export interface CallToolResult {
   [key: string]: unknown;
-  content: Array<{ type: "text"; text: string; }>;
+  content: Array<{ type: "text"; text: string }>;
   isError?: boolean;
 }
 
@@ -134,11 +134,7 @@ export function jsonResult(data: unknown): CallToolResult {
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 }
 
-export function errorResult(
-  code: HNErrorCode,
-  message: string,
-  retryable = false,
-): CallToolResult {
+export function errorResult(code: HNErrorCode, message: string, retryable = false): CallToolResult {
   return {
     content: [
       {

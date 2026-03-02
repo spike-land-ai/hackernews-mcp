@@ -82,10 +82,7 @@ describe("submit tools", () => {
     it("handles network errors", async () => {
       session.login("testuser", "user=testuser");
       const failServer = createMockServer();
-      const failClient = new HNWriteClient(
-        session,
-        createFailingFetch("Timeout"),
-      );
+      const failClient = new HNWriteClient(session, createFailingFetch("Timeout"));
       registerSubmitTools(
         failServer as unknown as Parameters<typeof registerSubmitTools>[0],
         failClient,

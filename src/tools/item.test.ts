@@ -42,10 +42,7 @@ describe("item tools", () => {
       },
     ]);
     readClient = new HNReadClient(fetch);
-    registerItemTools(
-      server as unknown as Parameters<typeof registerItemTools>[0],
-      readClient,
-    );
+    registerItemTools(server as unknown as Parameters<typeof registerItemTools>[0], readClient);
   });
 
   it("registers 2 tools", () => {
@@ -103,9 +100,7 @@ describe("item tools", () => {
     });
 
     it("handles network errors", async () => {
-      const failClient = new HNReadClient(
-        createFailingFetch("Connection reset"),
-      );
+      const failClient = new HNReadClient(createFailingFetch("Connection reset"));
       const failServer = createMockServer();
       registerItemTools(
         failServer as unknown as Parameters<typeof registerItemTools>[0],

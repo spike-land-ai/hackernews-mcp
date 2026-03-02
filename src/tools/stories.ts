@@ -8,18 +8,11 @@ import type { HNReadClient } from "../clients/hn-read-client.js";
 import { errorResult, jsonResult } from "../types.js";
 
 const StoriesSchema = {
-  category: z.enum(["top", "new", "best", "ask", "show", "job"]).describe(
-    "Story category",
-  ),
-  limit: z.number().int().min(1).max(100).default(30).describe(
-    "Number of stories to fetch",
-  ),
+  category: z.enum(["top", "new", "best", "ask", "show", "job"]).describe("Story category"),
+  limit: z.number().int().min(1).max(100).default(30).describe("Number of stories to fetch"),
 };
 
-export function registerStoriesTools(
-  server: McpServer,
-  readClient: HNReadClient,
-): void {
+export function registerStoriesTools(server: McpServer, readClient: HNReadClient): void {
   server.tool(
     "hn_get_stories",
     "Browse HackerNews stories by category (top, new, best, ask, show, job)",
@@ -30,7 +23,7 @@ export function registerStoriesTools(
         return jsonResult({
           category,
           count: stories.length,
-          stories: stories.map(s => ({
+          stories: stories.map((s) => ({
             id: s.id,
             title: s.title,
             url: s.url,

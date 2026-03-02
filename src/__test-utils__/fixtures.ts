@@ -81,8 +81,7 @@ export const SAMPLE_UPDATES = {
 
 // ─── HTML Fragments (for write operation testing) ───
 
-export const LOGIN_SUCCESS_HTML =
-  `<html><head><meta http-equiv="refresh" content="0;URL=news"></head></html>`;
+export const LOGIN_SUCCESS_HTML = `<html><head><meta http-equiv="refresh" content="0;URL=news"></head></html>`;
 
 export const LOGIN_FAILURE_HTML = `<html><body>Bad login.</body></html>`;
 
@@ -96,11 +95,9 @@ export const SUBMIT_PAGE_HTML = `<html><body>
 </form>
 </body></html>`;
 
-export const SUBMIT_SUCCESS_HTML =
-  `<html><head><meta http-equiv="refresh" content="0;URL=newest"></head></html>`;
+export const SUBMIT_SUCCESS_HTML = `<html><head><meta http-equiv="refresh" content="0;URL=newest"></head></html>`;
 
-export const SUBMIT_FAILURE_HTML =
-  `<html><body>Please limit submissions to 4 per hour.</body></html>`;
+export const SUBMIT_FAILURE_HTML = `<html><body>Please limit submissions to 4 per hour.</body></html>`;
 
 export const ITEM_PAGE_WITH_VOTE_HTML = `<html><body>
 <a id="up_12345" href="vote?id=12345&amp;how=up&amp;auth=votesecret123&amp;goto=item%3Fid%3D12345" class="clicky">
@@ -118,11 +115,8 @@ export const ITEM_PAGE_WITH_COMMENT_FORM_HTML = `<html><body>
 </form>
 </body></html>`;
 
-export const VOTE_SUCCESS_HTML =
-  `<html><head><meta http-equiv="refresh" content="0;URL=item?id=12345"></head></html>`;
+export const VOTE_SUCCESS_HTML = `<html><head><meta http-equiv="refresh" content="0;URL=item?id=12345"></head></html>`;
 
-export const COMMENT_SUCCESS_HTML =
-  `<html><head><meta http-equiv="refresh" content="0;URL=item?id=12345"></head></html>`;
+export const COMMENT_SUCCESS_HTML = `<html><head><meta http-equiv="refresh" content="0;URL=item?id=12345"></head></html>`;
 
-export const RATE_LIMITED_HTML =
-  `<html><body>You're submitting too fast. Please slow down.</body></html>`;
+export const RATE_LIMITED_HTML = `<html><body>You're submitting too fast. Please slow down.</body></html>`;

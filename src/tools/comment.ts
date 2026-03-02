@@ -7,17 +7,12 @@ import { z } from "zod";
 import type { HNWriteClient } from "../clients/hn-write-client.js";
 import { errorResult, jsonResult } from "../types.js";
 
-export function registerCommentTools(
-  server: McpServer,
-  writeClient: HNWriteClient,
-): void {
+export function registerCommentTools(server: McpServer, writeClient: HNWriteClient): void {
   server.tool(
     "hn_post_comment",
     "Post a comment or reply on HackerNews (requires login)",
     {
-      parentId: z.number().int().positive().describe(
-        "ID of the item to reply to",
-      ),
+      parentId: z.number().int().positive().describe("ID of the item to reply to"),
       text: z.string().min(1).describe("Comment text"),
     },
     async ({ parentId, text }) => {

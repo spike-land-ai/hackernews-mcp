@@ -34,19 +34,12 @@ export function registerAuthTools(
     },
   );
 
-  server.tool(
-    "hn_auth_status",
-    "Check current HN authentication status",
-    {},
-    async () => {
-      const state = session.getState();
-      return jsonResult({
-        loggedIn: session.isLoggedIn(),
-        username: state.username,
-        loggedInAt: state.loggedInAt
-          ? new Date(state.loggedInAt).toISOString()
-          : null,
-      });
-    },
-  );
+  server.tool("hn_auth_status", "Check current HN authentication status", {}, async () => {
+    const state = session.getState();
+    return jsonResult({
+      loggedIn: session.isLoggedIn(),
+      username: state.username,
+      loggedInAt: state.loggedInAt ? new Date(state.loggedInAt).toISOString() : null,
+    });
+  });
 }

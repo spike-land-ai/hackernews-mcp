@@ -32,10 +32,7 @@ describe("vote tools", () => {
       },
     ]);
     writeClient = new HNWriteClient(session, fetch);
-    registerVoteTools(
-      server as unknown as Parameters<typeof registerVoteTools>[0],
-      writeClient,
-    );
+    registerVoteTools(server as unknown as Parameters<typeof registerVoteTools>[0], writeClient);
   });
 
   it("registers 1 tool", () => {
@@ -61,10 +58,7 @@ describe("vote tools", () => {
     it("handles network errors", async () => {
       session.login("testuser", "user=testuser");
       const failServer = createMockServer();
-      const failClient = new HNWriteClient(
-        session,
-        createFailingFetch("Timeout"),
-      );
+      const failClient = new HNWriteClient(session, createFailingFetch("Timeout"));
       registerVoteTools(
         failServer as unknown as Parameters<typeof registerVoteTools>[0],
         failClient,
@@ -86,10 +80,7 @@ describe("vote tools", () => {
       ]);
       const failServer = createMockServer();
       const client = new HNWriteClient(session, fetch);
-      registerVoteTools(
-        failServer as unknown as Parameters<typeof registerVoteTools>[0],
-        client,
-      );
+      registerVoteTools(failServer as unknown as Parameters<typeof registerVoteTools>[0], client);
 
       const result = await failServer.call("hn_upvote", { itemId: 12345 });
       expect(result.isError).toBe(true);
@@ -112,10 +103,7 @@ describe("vote tools", () => {
       ]);
       const failServer = createMockServer();
       const client = new HNWriteClient(session, fetch);
-      registerVoteTools(
-        failServer as unknown as Parameters<typeof registerVoteTools>[0],
-        client,
-      );
+      registerVoteTools(failServer as unknown as Parameters<typeof registerVoteTools>[0], client);
 
       const result = await failServer.call("hn_upvote", { itemId: 12345 });
       expect(result.isError).toBe(true);

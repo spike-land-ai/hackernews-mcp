@@ -7,10 +7,7 @@ import { z } from "zod";
 import type { HNWriteClient } from "../clients/hn-write-client.js";
 import { errorResult, jsonResult } from "../types.js";
 
-export function registerSubmitTools(
-  server: McpServer,
-  writeClient: HNWriteClient,
-): void {
+export function registerSubmitTools(server: McpServer, writeClient: HNWriteClient): void {
   server.tool(
     "hn_submit_story",
     "Submit a new story to HackerNews (requires login). Provide url for a link post, or text for an Ask HN/text post.",
@@ -21,10 +18,7 @@ export function registerSubmitTools(
     },
     async ({ title, url, text }) => {
       if (!url && !text) {
-        return errorResult(
-          "INVALID_INPUT",
-          "Provide either url or text (or both)",
-        );
+        return errorResult("INVALID_INPUT", "Provide either url or text (or both)");
       }
 
       try {

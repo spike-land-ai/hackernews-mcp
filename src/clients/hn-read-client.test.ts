@@ -288,8 +288,7 @@ describe("HNReadClient", () => {
         numericFilters: "points>100",
       });
       expect(fetch).toHaveBeenCalledTimes(1);
-      const calledUrl = (fetch as ReturnType<typeof vi.fn>).mock
-        .calls[0][0] as string;
+      const calledUrl = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
       expect(calledUrl).toContain("tags=story");
       expect(calledUrl).toContain("page=2");
       expect(calledUrl).toContain("hitsPerPage=10");
@@ -316,9 +315,7 @@ describe("HNReadClient", () => {
     it("search throws on network failure", async () => {
       const fetch = createFailingFetch("Network error");
       const client = new HNReadClient(fetch);
-      await expect(client.search({ query: "test" })).rejects.toThrow(
-        "Network error",
-      );
+      await expect(client.search({ query: "test" })).rejects.toThrow("Network error");
     });
   });
 

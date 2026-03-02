@@ -7,30 +7,22 @@ import { z } from "zod";
 import type { HNReadClient } from "../clients/hn-read-client.js";
 import { errorResult, jsonResult } from "../types.js";
 
-export function registerSearchTools(
-  server: McpServer,
-  readClient: HNReadClient,
-): void {
+export function registerSearchTools(server: McpServer, readClient: HNReadClient): void {
   server.tool(
     "hn_search",
     "Search HackerNews stories and comments via Algolia",
     {
       query: z.string().min(1).describe("Search query"),
-      sortBy: z.enum(["relevance", "date"]).default("relevance").describe(
-        "Sort order",
-      ),
-      tags: z.string().optional().describe(
-        "Filter tags (e.g. \"story\", \"comment\", \"author_pg\")",
-      ),
+      sortBy: z.enum(["relevance", "date"]).default("relevance").describe("Sort order"),
+      tags: z.string().optional().describe('Filter tags (e.g. "story", "comment", "author_pg")'),
       page: z.number().int().min(0).default(0).describe("Page number"),
-      hitsPerPage: z.number().int().min(1).max(100).default(20).describe(
-        "Results per page",
-      ),
-      numericFilters: z.string().optional().describe(
-        "Numeric filters (e.g. \"points>100,num_comments>10\")",
-      ),
+      hitsPerPage: z.number().int().min(1).max(100).default(20).describe("Results per page"),
+      numericFilters: z
+        .string()
+        .optional()
+        .describe('Numeric filters (e.g. "points>100,num_comments>10")'),
     },
-    async params => {
+    async (params) => {
       try {
         const result = await readClient.search(params);
         return jsonResult({
@@ -38,7 +30,7 @@ export function registerSearchTools(
           totalHits: result.nbHits,
           page: result.page,
           totalPages: result.nbPages,
-          hits: result.hits.map(h => ({
+          hits: result.hits.map((h) => ({
             id: h.objectID,
             title: h.title,
             url: h.url,
@@ -58,18 +50,13 @@ export function registerSearchTools(
     },
   );
 
-  server.tool(
-    "hn_get_updates",
-    "Get recently changed HN items and profiles",
-    {},
-    async () => {
-      try {
-        const updates = await readClient.getUpdates();
-        return jsonResult(updates);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return errorResult("NETWORK_ERROR", message, true);
-      }
-    },
-  );
+  server.tool("hn_get_updates", "Get recently changed HN items and profiles", {}, async () => {
+    try {
+      const updates = await readClient.getUpdates();
+      return jsonResult(updates);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return errorResult("NETWORK_ERROR", message, true);
+    }
+  });
 }

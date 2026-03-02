@@ -68,10 +68,7 @@ describe("comment tools", () => {
     it("handles network errors", async () => {
       session.login("testuser", "user=testuser");
       const failServer = createMockServer();
-      const failClient = new HNWriteClient(
-        session,
-        createFailingFetch("Timeout"),
-      );
+      const failClient = new HNWriteClient(session, createFailingFetch("Timeout"));
       registerCommentTools(
         failServer as unknown as Parameters<typeof registerCommentTools>[0],
         failClient,
